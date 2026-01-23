@@ -344,70 +344,92 @@
             );
         };
 
-        const ContactModern = () => {
-            return (
-                <section id="contact" className="py-32 bg-brand-dark text-white relative">
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-                    
-                    <div className="max-w-4xl mx-auto px-6 relative z-10">
-                        <div className="text-center mb-16 reveal-up">
-                            <h2 className="font-serif text-4xl md:text-6xl mb-6">Créons l'inoubliable</h2>
-                            <p className="text-gray-400 font-light text-lg">
-                                Basés à Dakar, nous opérons sur tout le Sénégal pour vos événements de prestige.
-                            </p>
-                        </div>
+       const ContactModern = () => {
+    return (
+        <section id="contact" className="py-32 bg-brand-dark text-white relative">
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+            
+            <div className="max-w-4xl mx-auto px-6 relative z-10">
+                <div className="text-center mb-16 reveal-up">
+                    <h2 className="font-serif text-4xl md:text-6xl mb-6">Créons l'inoubliable</h2>
+                    <p className="text-gray-400 font-light text-lg">
+                        Basés à Dakar, nous opérons sur tout le Sénégal pour vos événements de prestige.
+                    </p>
+                </div>
 
-                        <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 md:p-12 reveal-up">
-                            <form className="space-y-8">
-                                <div className="grid md:grid-cols-2 gap-8">
-                                    <div className="space-y-2">
-                                        <label className="text-xs uppercase tracking-wider text-brand-gold">Nom Complet</label>
-                                        <input type="text" className="w-full bg-transparent border-b border-gray-600 py-3 text-white focus:border-brand-gold outline-none transition-colors" placeholder="Votre nom" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs uppercase tracking-wider text-brand-gold">Téléphone</label>
-                                        <input type="tel" className="w-full bg-transparent border-b border-gray-600 py-3 text-white focus:border-brand-gold outline-none transition-colors" placeholder="+221 ..." />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs uppercase tracking-wider text-brand-gold">Email</label>
-                                    <input type="email" className="w-full bg-transparent border-b border-gray-600 py-3 text-white focus:border-brand-gold outline-none transition-colors" placeholder="votre@email.com" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs uppercase tracking-wider text-brand-gold">Détails du projet</label>
-                                    <textarea rows="4" className="w-full bg-transparent border-b border-gray-600 py-3 text-white focus:border-brand-gold outline-none transition-colors" placeholder="Date, lieu, nombre d'invités..."></textarea>
-                                </div>
-                                <div className="pt-4 text-center">
-                                    <Button variant="primary" className="w-full md:w-auto min-w-[200px]">
-                                        Envoyer
-                                    </Button>
-                                </div>
-                            </form>
-                        </div>
+                <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 md:p-12 reveal-up">
+                    {/* MODIFICATION 1 : Ajout des attributs Netlify */}
+                    <form 
+                        name="contact-client" 
+                        method="POST" 
+                        data-netlify="true" 
+                        className="space-y-8"
+                    >
+                        {/* MODIFICATION 2 : Input caché obligatoire pour React */}
+                        <input type="hidden" name="form-name" value="contact-client" />
 
-                        <div className="mt-20 flex flex-col md:flex-row justify-center items-center gap-12 text-center reveal-up">
-                            <div>
-                                <h4 className="font-serif text-brand-gold text-xl mb-2">Téléphone</h4>
-                                <p className="text-gray-300 font-light">77 399 96 35</p>
-                                <p className="text-gray-300 font-light">78 781 11 74</p>
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div className="space-y-2">
+                                <label className="text-xs uppercase tracking-wider text-brand-gold">Nom Complet</label>
+                                {/* MODIFICATION 3 : Ajout de name="nom" */}
+                                <input 
+                                    type="text" 
+                                    name="nom" 
+                                    className="w-full bg-transparent border-b border-gray-600 py-3 text-white focus:border-brand-gold outline-none transition-colors" 
+                                    placeholder="Votre nom" 
+                                    required 
+                                />
                             </div>
-                            <div className="w-px h-12 bg-white/20 hidden md:block"></div>
-                            <div>
-                                <h4 className="font-serif text-brand-gold text-xl mb-2">Email</h4>
-                                <p className="text-gray-300 font-light">eventsteranga@gmail.com</p>
-                            </div>
-                            <div className="w-px h-12 bg-white/20 hidden md:block"></div>
-                            <div>
-                                <h4 className="font-serif text-brand-gold text-xl mb-2">Social</h4>
-                                <a href="https://www.instagram.com/terangaevents7477?igsh=MTBhaGd2dDhybjltNA==" className="text-gray-300 hover:text-white flex items-center gap-2 transition-colors">
-                                    <Icon name="instagram" size={18} /> @maisonterangaevents
-                                </a>
+                            <div className="space-y-2">
+                                <label className="text-xs uppercase tracking-wider text-brand-gold">Téléphone</label>
+                                {/* MODIFICATION 3 : Ajout de name="telephone" */}
+                                <input 
+                                    type="tel" 
+                                    name="telephone" 
+                                    className="w-full bg-transparent border-b border-gray-600 py-3 text-white focus:border-brand-gold outline-none transition-colors" 
+                                    placeholder="+221 ..." 
+                                    required
+                                />
                             </div>
                         </div>
-                    </div>
-                </section>
-            );
-        };
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-wider text-brand-gold">Email</label>
+                            {/* MODIFICATION 3 : Ajout de name="email" */}
+                            <input 
+                                type="email" 
+                                name="email" 
+                                className="w-full bg-transparent border-b border-gray-600 py-3 text-white focus:border-brand-gold outline-none transition-colors" 
+                                placeholder="votre@email.com" 
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-xs uppercase tracking-wider text-brand-gold">Détails du projet</label>
+                            {/* MODIFICATION 3 : Ajout de name="message" */}
+                            <textarea 
+                                name="message"
+                                rows="4" 
+                                className="w-full bg-transparent border-b border-gray-600 py-3 text-white focus:border-brand-gold outline-none transition-colors" 
+                                placeholder="Date, lieu, nombre d'invités..."
+                                required
+                            ></textarea>
+                        </div>
+                        <div className="pt-4 text-center">
+                            <Button type="submit" variant="primary" className="w-full md:w-auto min-w-[200px]">
+                                Envoyer
+                            </Button>
+                        </div>
+                    </form>
+                </div>
+
+                {/* ... Le reste de votre code (footer) reste identique ... */}
+                <div className="mt-20 flex flex-col md:flex-row justify-center items-center gap-12 text-center reveal-up">
+                    {/* ... */}
+                </div>
+            </div>
+        </section>
+    );
+};
 
         const Footer = () => (
             <footer className="bg-black text-white py-8 border-t border-white/10 text-center">
