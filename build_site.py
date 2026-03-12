@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+html = r"""<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -679,4 +679,9 @@ document.querySelectorAll('.rv').forEach(el => revObs.observe(el));
 })();
 </script>
 </body>
-</html>
+</html>"""
+
+with open('index.html', 'w', encoding='utf-8') as f:
+    f.write(html)
+
+print('index.html generé avec succès !')
