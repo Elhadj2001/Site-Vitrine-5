@@ -160,13 +160,15 @@ nav.on .nhb span{background:var(--G)}
 /* GALLERY */
 #gal{padding:110px 40px;background:var(--C)}
 .galw{max-width:1380px;margin:0 auto}
-.galg{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:260px;gap:6px;margin-top:44px}
-.gitem{position:relative;overflow:hidden;cursor:pointer}
-.gitem:nth-child(1){grid-row:span 2}
-.gitem:nth-child(4){grid-column:span 2}
+.gal-filters{display:flex;justify-content:center;gap:10px;margin-top:36px;flex-wrap:wrap}
+.gf-btn{padding:9px 22px;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:1px solid rgba(16,73,17,.25);background:transparent;color:var(--G);cursor:pointer;transition:all .3s;font-family:'Lato',sans-serif}
+.gf-btn:hover,.gf-btn.active{background:var(--G);color:#fff;border-color:var(--G)}
+.galg{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:260px;gap:6px;margin-top:24px}
+.gitem{position:relative;overflow:hidden;cursor:pointer;transition:opacity .4s,transform .4s}
+.gitem.hidden{opacity:0;pointer-events:none;transform:scale(.95)}
 .gitem img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.25,.46,.45,.94)}
 .gitem:hover img{transform:scale(1.06)}
-.gov{position:absolute;inset:0;background:rgba(5,46,5,.75);opacity:0;display:flex;align-items:center;justify-content:center;transition:opacity .4s}
+.gov{position:absolute;inset:0;background:rgba(5,46,5,.8);opacity:0;display:flex;align-items:center;justify-content:center;transition:opacity .4s}
 .gitem:hover .gov{opacity:1}
 .gov span{color:#fff;font-family:'Cinzel',serif;font-size:17px;font-style:italic}
 
@@ -397,14 +399,15 @@ footer p{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(
       <p class="sl">Portfolio</p>
       <h2 class="stitle" style="color:var(--G)">Instants Capturés</h2>
     </div>
-    <div class="galg">
-      <div class="gitem rv" data-s="images/im1.jpg"><img src="images/im1.jpg" alt="Cérémonie"><div class="gov"><span>Cérémonies</span></div></div>
-      <div class="gitem rv" data-s="images/im2.jpg"><img src="images/im2.jpg" alt="Accueil VIP"><div class="gov"><span>Accueil VIP</span></div></div>
-      <div class="gitem rv" data-s="images/im3.jpg"><img src="images/im3.jpg" alt="Décoration"><div class="gov"><span>Décoration</span></div></div>
-      <div class="gitem rv" data-s="images/im4.jpg"><img src="images/im4.jpg" alt="Dîner de Gala"><div class="gov"><span>Dîners de Gala</span></div></div>
-      <div class="gitem rv" data-s="images/im5.jpg"><img src="images/im5.jpg" alt="Événementiel"><div class="gov"><span>Événementiel</span></div></div>
-      <div class="gitem rv" data-s="images/im6.jpg"><img src="images/im6.jpg" alt="Protocole"><div class="gov"><span>Protocole</span></div></div>
+    <div class="gal-filters rv" id="gal-filters">
+      <button class="gf-btn active" data-cat="all">Tout</button>
+      <button class="gf-btn" data-cat="mariage">Mariages</button>
+      <button class="gf-btn" data-cat="gala">Galas &amp; D&icirc;ners</button>
+      <button class="gf-btn" data-cat="protocole">Protocole</button>
+      <button class="gf-btn" data-cat="corporatif">Corporatif</button>
+      <button class="gf-btn" data-cat="ceremonie">C&eacute;r&eacute;monies</button>
     </div>
+    <div class="galg" id="galg"></div>
   </div>
 </section>
 
@@ -509,6 +512,7 @@ footer p{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(
   <textarea name="message"></textarea>
 </form>
 
+<script src="gallery-data.js"></script>
 <script>
 // YEAR
 document.getElementById('yr').textContent = new Date().getFullYear();
@@ -612,27 +616,65 @@ document.querySelectorAll('.rv').forEach(el => revObs.observe(el));
   timer = setInterval(() => go(cur + 1), 5000);
 })();
 
-// LIGHTBOX
+// GALLERY — Rendu dynamique depuis gallery-data.js + Filtres
 (function() {
-  const items = document.querySelectorAll('.gitem');
-  const lb = document.getElementById('lb');
-  const img = document.getElementById('lbi');
-  const srcs = Array.from(items).map(i => ({ s: i.dataset.s, a: i.querySelector('img').alt }));
-  let ci = 0;
-  const open = i => { ci = i; img.src = srcs[i].s; img.alt = srcs[i].a; lb.classList.add('open'); document.body.style.overflow = 'hidden'; };
-  const close = () => { lb.classList.remove('open'); document.body.style.overflow = ''; };
-  const nav = d => { ci = (ci + d + srcs.length) % srcs.length; img.src = srcs[ci].s; img.alt = srcs[ci].a; };
-  items.forEach((it, i) => it.addEventListener('click', () => open(i)));
-  document.getElementById('lbc').onclick = close;
-  document.getElementById('lbp').onclick = () => nav(-1);
-  document.getElementById('lbn').onclick = () => nav(1);
-  lb.addEventListener('click', e => { if (e.target === lb) close(); });
-  document.addEventListener('keydown', e => {
-    if (!lb.classList.contains('open')) return;
-    if (e.key === 'Escape') close();
-    if (e.key === 'ArrowLeft') nav(-1);
-    if (e.key === 'ArrowRight') nav(1);
+  const container = document.getElementById('galg');
+  const filterBtns = document.querySelectorAll('.gf-btn');
+  let data = (typeof GALLERY_DATA !== 'undefined') ? GALLERY_DATA : [];
+  let currentCat = 'all';
+  let srcs = [];
+
+  function buildGallery(items) {
+    srcs = items;
+    container.innerHTML = items.map((item, i) =>
+      `<div class="gitem rv" data-s="${item.src}" data-i="${i}">
+        <img src="${item.src}" alt="${item.label}" loading="lazy">
+        <div class="gov"><span>${item.label}</span></div>
+      </div>`
+    ).join('');
+    // Reveal observer
+    container.querySelectorAll('.rv').forEach(el => revObs.observe(el));
+    // Lightbox bindings
+    initLightbox();
+    // Cursor grow on new items
+    container.querySelectorAll('.gitem').forEach(el => {
+      el.addEventListener('mouseenter', () => cur.classList.add('big'));
+      el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+    });
+  }
+
+  function filterGallery(cat) {
+    currentCat = cat;
+    const filtered = cat === 'all' ? data : data.filter(d => d.cat === cat);
+    buildGallery(filtered);
+  }
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterGallery(btn.dataset.cat);
+    });
   });
+
+  // Initial render
+  buildGallery(data);
+
+  // LIGHTBOX
+  function initLightbox() {
+    const lb = document.getElementById('lb');
+    const img = document.getElementById('lbi');
+    let ci = 0;
+    const open = i => { ci = i; img.src = srcs[i].src; img.alt = srcs[i].label; lb.classList.add('open'); document.body.style.overflow = 'hidden'; };
+    const close = () => { lb.classList.remove('open'); document.body.style.overflow = ''; };
+    const nav = d => { ci = (ci + d + srcs.length) % srcs.length; img.src = srcs[ci].src; img.alt = srcs[ci].label; };
+    container.querySelectorAll('.gitem').forEach((it, i) => it.addEventListener('click', () => open(i)));
+    document.getElementById('lbc').onclick = close;
+    document.getElementById('lbp').onclick = () => nav(-1);
+    document.getElementById('lbn').onclick = () => nav(1);
+    lb.onclick = e => { if (e.target === lb) close(); };
+    document.onkeydown = e => { if (!lb.classList.contains('open')) return; if (e.key==='Escape') close(); if (e.key==='ArrowLeft') nav(-1); if (e.key==='ArrowRight') nav(1); };
+  }
 })();
 
 // FORM VALIDATION + SECURITY

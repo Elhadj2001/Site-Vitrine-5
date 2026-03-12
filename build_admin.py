@@ -1,0 +1,428 @@
+admin_html = r"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Galerie — Maison Téranga Events</title>
+<link rel="icon" href="images/logo.jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{--G:#104911;--D:#052e05;--A:#D4AF37;--C:#F9F9F7;--err:#e53935}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Lato',sans-serif;background:#f0f2f0;color:#1a1a1a;min-height:100vh}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--D);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:28px}
+.login-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:48px 56px;width:360px;text-align:center}
+.login-logo{width:64px;height:64px;object-fit:contain;margin:0 auto 20px}
+.login-title{font-family:'Cinzel',serif;color:var(--A);font-size:18px;letter-spacing:.1em;margin-bottom:6px}
+.login-sub{font-size:12px;color:rgba(255,255,255,.4);letter-spacing:.1em;margin-bottom:28px}
+.login-input{width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.2);padding:10px 0;color:#fff;font-family:'Lato',sans-serif;font-size:15px;outline:none;transition:border-color .3s;text-align:center;letter-spacing:.1em}
+.login-input:focus{border-color:var(--A)}
+.login-input::placeholder{color:rgba(255,255,255,.2)}
+.login-btn{width:100%;margin-top:24px;padding:14px;background:var(--A);border:none;color:#fff;font-family:'Lato',sans-serif;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:background .3s}
+.login-btn:hover{background:var(--G)}
+.login-err{color:var(--err);font-size:12px;margin-top:10px;display:none}
+
+/* MAIN LAYOUT */
+#main{display:none;flex-direction:column;min-height:100vh}
+header{background:var(--G);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.h-left{display:flex;align-items:center;gap:14px}
+.h-logo{height:38px;width:auto;object-fit:contain}
+.h-title{font-family:'Cinzel',serif;color:#fff;font-size:15px;letter-spacing:.12em}
+.h-sub{font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.15em;text-transform:uppercase;margin-top:2px}
+.h-right{display:flex;align-items:center;gap:14px}
+.site-link{font-size:11px;color:rgba(255,255,255,.6);text-decoration:none;letter-spacing:.1em;transition:color .3s}
+.site-link:hover{color:var(--A)}
+.logout-btn{padding:8px 18px;background:transparent;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7);font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;font-family:'Lato',sans-serif}
+.logout-btn:hover{border-color:var(--A);color:var(--A)}
+.content{flex:1;display:grid;grid-template-columns:380px 1fr;gap:0}
+
+/* LEFT PANEL — ADD FORM */
+.panel-left{background:#fff;border-right:1px solid #e5e5e5;padding:32px;display:flex;flex-direction:column;gap:24px}
+.panel-title{font-family:'Cinzel',serif;font-size:15px;color:var(--G);padding-bottom:16px;border-bottom:2px solid var(--A)}
+.drop-zone{border:2px dashed #ccc;background:#fafafa;padding:24px 16px;text-align:center;cursor:pointer;transition:all .3s;border-radius:2px;position:relative}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--G);background:rgba(16,73,17,.04)}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz-icon{font-size:32px;margin-bottom:8px}
+.dz-text{font-size:12px;color:#888;line-height:1.5}
+.dz-preview{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:2px;display:none;border:1px solid #e5e5e5}
+.form-field{display:flex;flex-direction:column;gap:6px}
+.form-field label{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:var(--G);font-weight:700}
+.form-field input,.form-field select{border:1px solid #ddd;padding:10px 12px;font-family:'Lato',sans-serif;font-size:14px;color:#1a1a1a;outline:none;transition:border-color .3s;background:#fff;width:100%}
+.form-field input:focus,.form-field select:focus{border-color:var(--G)}
+.path-hint{font-size:11px;color:#aaa;margin-top:3px}
+.add-btn{padding:13px;background:var(--G);border:none;color:#fff;font-family:'Lato',sans-serif;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:background .3s;width:100%}
+.add-btn:hover{background:var(--D)}
+.add-msg{font-size:12px;color:var(--G);text-align:center;display:none;padding:8px;background:rgba(16,73,17,.08);border:1px solid rgba(16,73,17,.2)}
+
+/* RIGHT PANEL — GALLERY LIST */
+.panel-right{padding:32px;display:flex;flex-direction:column;gap:20px;overflow-y:auto}
+.pr-header{display:flex;align-items:center;justify-content:space-between}
+.pr-title{font-family:'Cinzel',serif;font-size:15px;color:var(--G);padding-bottom:16px;border-bottom:2px solid var(--A);flex:1}
+.item-count{font-size:12px;color:#888;margin-left:12px;margin-top:auto;padding-bottom:16px}
+.export-btn{padding:12px 28px;background:var(--A);border:none;color:#fff;font-family:'Lato',sans-serif;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:background .3s;margin-bottom:16px}
+.export-btn:hover{background:#b8960a}
+.gallery-list{display:flex;flex-direction:column;gap:8px}
+.g-item{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #e8e8e8;padding:12px;transition:box-shadow .2s}
+.g-item:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.g-thumb{width:72px;height:54px;object-fit:cover;flex-shrink:0;border:1px solid #eee}
+.g-info{flex:1;min-width:0}
+.g-label{font-weight:700;font-size:14px;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-src{font-size:11px;color:#aaa;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-cat{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:3px 8px;margin-top:4px}
+.g-cat.mariage{background:rgba(219,148,148,.15);color:#a33}
+.g-cat.gala{background:rgba(212,175,55,.15);color:#8a6900}
+.g-cat.protocole{background:rgba(16,73,17,.1);color:var(--G)}
+.g-cat.corporatif{background:rgba(0,80,160,.1);color:#004da3}
+.g-cat.ceremonie{background:rgba(128,0,128,.1);color:#700070}
+.g-actions{display:flex;gap:6px;flex-shrink:0}
+.g-btn{width:32px;height:32px;border:1px solid #ddd;background:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;color:#555}
+.g-btn:hover{background:var(--G);color:#fff;border-color:var(--G)}
+.g-btn.del:hover{background:var(--err);border-color:var(--err)}
+.empty-gallery{text-align:center;padding:48px;color:#aaa;font-size:14px}
+.empty-gallery .emp-icon{font-size:48px;margin-bottom:12px}
+
+/* IMPORT SECTION */
+.import-wrap{margin-top:24px;padding:20px;background:#f8f8f8;border:1px solid #e5e5e5}
+.import-title{font-family:'Cinzel',serif;font-size:13px;color:var(--G);margin-bottom:12px}
+.import-textarea{width:100%;height:80px;border:1px solid #ddd;padding:8px;font-family:monospace;font-size:12px;resize:vertical;outline:none;transition:border-color .3s}
+.import-textarea:focus{border-color:var(--G)}
+.import-btn{margin-top:8px;padding:8px 16px;background:transparent;border:1px solid var(--G);color:var(--G);font-family:'Lato',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.import-btn:hover{background:var(--G);color:#fff}
+
+footer{background:var(--D);padding:16px 40px;text-align:center}
+footer p{font-size:10px;color:rgba(255,255,255,.25);letter-spacing:.15em;text-transform:uppercase}
+
+@media(max-width:768px){
+  .content{grid-template-columns:1fr}
+  .panel-left{border-right:none;border-bottom:1px solid #e5e5e5}
+  header{padding:0 20px}
+  .h-title{display:none}
+  .panel-left,.panel-right{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <img src="images/logo.jpeg" alt="Logo" class="login-logo">
+    <p class="login-title">Maison Téranga Events</p>
+    <p class="login-sub">Panneau d'Administration</p>
+    <input type="password" id="pw-input" class="login-input" placeholder="Mot de passe" autocomplete="current-password">
+    <button class="login-btn" id="login-btn">Accéder au Panneau</button>
+    <p class="login-err" id="login-err">Mot de passe incorrect. Veuillez réessayer.</p>
+  </div>
+  <p style="font-size:11px;color:rgba(255,255,255,.2);letter-spacing:.1em">Accès réservé à l'administrateur</p>
+</div>
+
+<!-- MAIN ADMIN PANEL -->
+<div id="main">
+  <header>
+    <div class="h-left">
+      <img src="images/logo.jpeg" alt="Logo" class="h-logo">
+      <div>
+        <p class="h-title">MAISON TÉRANGA EVENTS</p>
+        <p class="h-sub">Gestion de la Galerie</p>
+      </div>
+    </div>
+    <div class="h-right">
+      <a href="index.html" class="site-link" target="_blank">↗ Voir le site</a>
+      <button class="logout-btn" id="logout-btn">Déconnexion</button>
+    </div>
+  </header>
+
+  <div class="content">
+    <!-- LEFT: ADD FORM -->
+    <div class="panel-left">
+      <p class="panel-title">➕ Ajouter une image</p>
+
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="img-file" accept="image/*">
+        <div id="dz-content">
+          <div class="dz-icon">🖼️</div>
+          <div class="dz-text"><strong>Glisser une image ici</strong><br>ou cliquer pour choisir un fichier<br><span style="font-size:10px;color:#bbb">JPG, PNG, WEBP — Prévisualisation uniquement</span></div>
+        </div>
+        <img id="dz-preview" class="dz-preview" src="" alt="Aperçu">
+      </div>
+
+      <div class="form-field">
+        <label for="img-path">Chemin du fichier *</label>
+        <input type="text" id="img-path" placeholder="images/nom-du-fichier.jpg">
+        <span class="path-hint">⚠️ Copiez le fichier dans le dossier <strong>images/</strong> du site, puis entrez son chemin ici.</span>
+      </div>
+
+      <div class="form-field">
+        <label for="img-label">Titre de l'image *</label>
+        <input type="text" id="img-label" placeholder="Ex: Mariage Royal 2024">
+      </div>
+
+      <div class="form-field">
+        <label for="img-cat">Catégorie *</label>
+        <select id="img-cat">
+          <option value="" disabled selected>Choisir une catégorie...</option>
+          <option value="mariage">💍 Mariages</option>
+          <option value="gala">🍽️ Galas & Dîners</option>
+          <option value="protocole">🏛️ Protocole Officiel</option>
+          <option value="corporatif">💼 Événements Corporatifs</option>
+          <option value="ceremonie">🎊 Cérémonies</option>
+        </select>
+      </div>
+
+      <button class="add-btn" id="add-btn">Ajouter à la galerie</button>
+      <p class="add-msg" id="add-msg">✔ Image ajoutée avec succès !</p>
+
+      <div class="import-wrap">
+        <p class="import-title">📥 Importer une configuration existante</p>
+        <textarea class="import-textarea" id="import-ta" placeholder='Collez ici le contenu de gallery-data.js et cliquez "Importer"'></textarea>
+        <button class="import-btn" id="import-btn">Importer</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: GALLERY LIST -->
+    <div class="panel-right">
+      <div class="pr-header">
+        <p class="pr-title">📋 Images de la galerie</p>
+        <span class="item-count" id="item-count"></span>
+      </div>
+      <button class="export-btn" id="export-btn">📥 Exporter gallery-data.js</button>
+      <div class="gallery-list" id="gallery-list"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© Maison Téranga Events — Panneau d'Administration</p>
+  </footer>
+</div>
+
+<script>
+// ============================================================
+// CONFIG — Changer le mot de passe ici
+// ============================================================
+const PASSWORD = 'Teranga2025';
+const CATS = { mariage:'Mariages', gala:'Galas & Dîners', protocole:'Protocole', corporatif:'Corporatif', ceremonie:'Cérémonies' };
+const STORAGE_KEY = 'mte_gallery_data';
+
+// ============================================================
+// ÉTAT
+// ============================================================
+let gallery = [];
+
+// ============================================================
+// LOGIN
+// ============================================================
+const loginScreen = document.getElementById('login-screen');
+const mainEl = document.getElementById('main');
+
+function checkLogin() {
+  if (sessionStorage.getItem('mte_auth') === '1') showAdmin();
+}
+
+document.getElementById('login-btn').onclick = () => {
+  const val = document.getElementById('pw-input').value;
+  if (val === PASSWORD) {
+    sessionStorage.setItem('mte_auth', '1');
+    showAdmin();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+};
+
+document.getElementById('pw-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('login-btn').click();
+});
+
+document.getElementById('logout-btn').onclick = () => {
+  sessionStorage.removeItem('mte_auth');
+  location.reload();
+};
+
+function showAdmin() {
+  loginScreen.style.display = 'none';
+  mainEl.style.display = 'flex';
+  loadGallery();
+  renderList();
+}
+
+// ============================================================
+// DONNÉES — localStorage
+// ============================================================
+function loadGallery() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    try { gallery = JSON.parse(stored); } catch(e) { gallery = getDefaults(); }
+  } else {
+    gallery = getDefaults();
+  }
+}
+
+function saveGallery() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(gallery));
+}
+
+function getDefaults() {
+  return [
+    { src: 'images/im1.jpg', cat: 'ceremonie',  label: 'Cérémonies' },
+    { src: 'images/im2.jpg', cat: 'gala',       label: 'Accueil VIP' },
+    { src: 'images/im3.jpg', cat: 'mariage',    label: 'Décoration Florale' },
+    { src: 'images/im4.jpg', cat: 'gala',       label: 'Dîner de Gala' },
+    { src: 'images/im5.jpg', cat: 'corporatif', label: 'Événement Corporatif' },
+    { src: 'images/im6.jpg', cat: 'protocole',  label: 'Protocole Officiel' },
+  ];
+}
+
+// ============================================================
+// RENDU DE LA LISTE
+// ============================================================
+function renderList() {
+  const list = document.getElementById('gallery-list');
+  document.getElementById('item-count').textContent = `${gallery.length} image${gallery.length !== 1 ? 's' : ''}`;
+
+  if (gallery.length === 0) {
+    list.innerHTML = '<div class="empty-gallery"><div class="emp-icon">🖼️</div><p>Aucune image dans la galerie.<br>Ajoutez votre première image à gauche !</p></div>';
+    return;
+  }
+
+  list.innerHTML = gallery.map((item, i) => `
+    <div class="g-item" id="item-${i}">
+      <img class="g-thumb" src="${escHtml(item.src)}" alt="${escHtml(item.label)}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'72\\' height=\\'54\\'><rect width=\\'72\\' height=\\'54\\' fill=\\'%23eee\\'/><text x=\\'50%25\\' y=\\'50%25\\' text-anchor=\\'middle\\' dominant-baseline=\\'middle\\' font-size=\\'10\\' fill=\\'%23aaa\\'>?</text></svg>'">
+      <div class="g-info">
+        <div class="g-label">${escHtml(item.label)}</div>
+        <div class="g-src">${escHtml(item.src)}</div>
+        <span class="g-cat ${escHtml(item.cat)}">${CATS[item.cat] || item.cat}</span>
+      </div>
+      <div class="g-actions">
+        <button class="g-btn" onclick="moveUp(${i})" title="Monter">↑</button>
+        <button class="g-btn" onclick="moveDown(${i})" title="Descendre">↓</button>
+        <button class="g-btn del" onclick="deleteItem(${i})" title="Supprimer">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+function moveUp(i) { if (i === 0) return; [gallery[i-1], gallery[i]] = [gallery[i], gallery[i-1]]; save(); }
+function moveDown(i) { if (i >= gallery.length-1) return; [gallery[i+1], gallery[i]] = [gallery[i], gallery[i+1]]; save(); }
+function deleteItem(i) { if (!confirm('Supprimer cette image de la galerie ?')) return; gallery.splice(i, 1); save(); }
+function save() { saveGallery(); renderList(); }
+
+// ============================================================
+// AJOUT D'IMAGE
+// ============================================================
+const dropZone = document.getElementById('drop-zone');
+const imgFile = document.getElementById('img-file');
+const dzPreview = document.getElementById('dz-preview');
+const dzContent = document.getElementById('dz-content');
+
+imgFile.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  previewFile(file);
+  // Auto-fill path
+  if (!document.getElementById('img-path').value)
+    document.getElementById('img-path').value = 'images/' + file.name;
+});
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    previewFile(file);
+    if (!document.getElementById('img-path').value)
+      document.getElementById('img-path').value = 'images/' + file.name;
+  }
+});
+
+function previewFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    dzPreview.src = ev.target.result;
+    dzPreview.style.display = 'block';
+    dzContent.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('add-btn').onclick = () => {
+  const path = document.getElementById('img-path').value.trim();
+  const label = document.getElementById('img-label').value.trim();
+  const cat = document.getElementById('img-cat').value;
+  const msg = document.getElementById('add-msg');
+
+  if (!path || !label || !cat) { alert('Veuillez remplir tous les champs obligatoires (*)'); return; }
+
+  gallery.push({ src: path, cat, label });
+  saveGallery(); renderList();
+
+  // Reset form
+  document.getElementById('img-path').value = '';
+  document.getElementById('img-label').value = '';
+  document.getElementById('img-cat').value = '';
+  document.getElementById('img-file').value = '';
+  dzPreview.style.display = 'none';
+  dzContent.style.display = 'block';
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
+};
+
+// ============================================================
+// EXPORT gallery-data.js
+// ============================================================
+document.getElementById('export-btn').onclick = () => {
+  const header = `/**\n * GALERIE MAISON TERANGA EVENTS\n * Fichier généré le ${new Date().toLocaleDateString('fr-FR')} depuis le panel admin.\n * Ne modifiez ce fichier que si vous savez ce que vous faites.\n */\n\nconst GALLERY_DATA = `;
+  const data = JSON.stringify(gallery, null, 2);
+  const footer = `;\n`;
+  const content = header + data + footer;
+  const blob = new Blob([content], { type: 'text/javascript' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'gallery-data.js'; a.click();
+  URL.revokeObjectURL(url);
+};
+
+// ============================================================
+// IMPORT existant
+// ============================================================
+document.getElementById('import-btn').onclick = () => {
+  const raw = document.getElementById('import-ta').value.trim();
+  if (!raw) return;
+  try {
+    // Extract array from "const GALLERY_DATA = [...];"
+    const match = raw.match(/const GALLERY_DATA\s*=\s*(\[[\s\S]*?\]);/);
+    if (!match) throw new Error('Format invalide');
+    const data = JSON.parse(match[1]);
+    if (!Array.isArray(data)) throw new Error('Doit être un tableau');
+    gallery = data;
+    saveGallery(); renderList();
+    document.getElementById('import-ta').value = '';
+    alert(`✔ ${data.length} image(s) importée(s) avec succès !`);
+  } catch(e) {
+    alert('❌ Erreur lors de l\'import : ' + e.message + '\nVérifiez que vous avez bien collé le contenu complet de gallery-data.js');
+  }
+};
+
+// ============================================================
+// DÉMARRAGE
+// ============================================================
+checkLogin();
+</script>
+</body>
+</html>"""
+
+with open('admin.html', 'w', encoding='utf-8') as f:
+    f.write(admin_html)
+
+print('admin.html genere avec succes !')
